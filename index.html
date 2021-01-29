@@ -1,0 +1,83 @@
+<style>
+  body {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .barrel-organ {
+    display: inline-block;
+    position: relative;
+  }
+
+  .barrel-organ1 {
+
+  }
+
+  .barrel-organ2 {
+    position: absolute;
+    left: calc(50% - 9px);
+    top: calc(60px - 9px);
+    transform-origin: 9px 9px;
+  }
+</style>
+
+<div class="barrel-organ">
+  <img class="barrel-organ1" src="barrel-organ.png">
+  <img class="barrel-organ2" src="barrel-organ2.png">
+</div>
+
+<script>
+  async function main() {
+    const response = await fetch('Scherzo_No1_Chopin.mp3')
+    const audioData = await response.arrayBuffer()
+
+    let audioContext
+    let source
+    let buffer
+
+    const $barrelOrgan = document.querySelector('.barrel-organ')
+    const $barrelOrgan2 = document.querySelector('.barrel-organ2')
+    let moving = false
+    $barrelOrgan2.addEventListener('pointerdown', async function (event) {
+      event.preventDefault()
+      moving = true
+      if (!audioContext) {
+        audioContext = new AudioContext()
+        source = audioContext.createBufferSource()
+        buffer = await audioContext.decodeAudioData(audioData)
+        source.buffer = buffer
+        source.playbackRate.value = 0
+        source.connect(audioContext.destination)
+        source.loop = true
+        source.start()
+      }
+    })
+
+    document.addEventListener('pointermove', function (event) {
+      if (moving) {
+        const rotationCenter = {
+          x: 0.5 * window.innerWidth,
+          y: $barrelOrgan.getBoundingClientRect().y + 60
+        }
+        const movePoint = {
+          x: event.clientX,
+          y: event.clientY
+        }
+        const angle = Math.atan2(
+          movePoint.y - rotationCenter.y,
+          movePoint.x - rotationCenter.x
+        )
+        $barrelOrgan2.style.transform = `rotate(${-0.5 * Math.PI + angle}rad)`
+        source.playbackRate.value = 1
+      }
+    })
+    document.addEventListener('pointerup', function () {
+      moving = false
+      source.playbackRate.value = 0
+    })
+  }
+
+  main()
+</script>
