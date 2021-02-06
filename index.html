@@ -55,6 +55,7 @@
       }
     })
 
+    let handle = null
     document.addEventListener('pointermove', function (event) {
       if (moving) {
         const rotationCenter = {
@@ -71,11 +72,16 @@
         )
         $barrelOrgan2.style.transform = `rotate(${-0.5 * Math.PI + angle}rad)`
         source.playbackRate.value = 1
+        if (handle) {
+          clearTimeout(handle)
+        }
+        handle = setTimeout(function () {
+          source.playbackRate.value = 0
+        }, 20)
       }
     })
     document.addEventListener('pointerup', function () {
       moving = false
-      source.playbackRate.value = 0
     })
   }
 
